@@ -1,0 +1,19 @@
+[project]
+name = "hng-8"
+version = "0.1.0"
+description = "Add your description here"
+readme = "README.md"
+requires-python = ">=3.11"
+dependencies = [
+    "alembic>=1.17.2",
+    "fastapi>=0.124.0",
+    "httpx>=0.28.1",
+    "passlib[argon2,bcrypt]>=1.7.4",
+    "psycopg2-binary>=2.9.11",
+    "pydantic[email]>=2.12.5",
+    "python-dateutil>=2.9.0.post0",
+    "python-dotenv>=1.2.1",
+    "python-jose[cryptography]>=3.5.0",
+    "python-multipart>=0.0.20",
+    "uvicorn[standard]>=0.38.0",
+]
