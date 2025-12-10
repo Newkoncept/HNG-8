@@ -289,7 +289,7 @@ async def get_wallet_balance(
     require_permission(principal, "read")
 
     wallet = get_or_create_wallet(db, principal.user_id)
-    return BalanceResponse(balance=wallet.balance)
+    return BalanceResponse(wallet_number=wallet.wallet_number, balance=wallet.balance)
 
 
 @router.get("/transactions", response_model=list[TransactionItem])
