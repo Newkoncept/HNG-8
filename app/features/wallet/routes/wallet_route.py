@@ -2,8 +2,7 @@ from fastapi import APIRouter, Depends, HTTPException, Request, Header, status
 from sqlalchemy.orm import Session
 from uuid import uuid4
 import os
-import hmac
-import hashlib
+
 import httpx
 
 from app.database.db import get_db
@@ -24,26 +23,19 @@ from app.features.wallet.schemas.wallet_schema import (
     TransferResponse,
     TransactionItem
 )
+from app.features.wallet.utils.wallet_util import (
+    get_or_create_wallet,
+    verify_paystack_signature,
+    generate_reference_number
+
+)
 from dotenv import load_dotenv
-
-
 load_dotenv()
 
 router = APIRouter(prefix="/wallet", tags=["wallet"])
 
-PAYSTACK_SECRET_KEY = os.getenv("PAYSTACK_SECRET_KEY", "replace_me")
+PAYSTACK_SECRET_KEY = os.getenv("PAYSTACK_SECRET_KEY", "")
 PAYSTACK_BASE_URL = "https://api.paystack.co"
-
-
-def get_or_create_wallet(db: Session, user_id: str) -> Wallet:
-    wallet = db.query(Wallet).filter(Wallet.user_id == user_id).first()
-    if wallet:
-        return wallet
-    wallet = Wallet(user_id=user_id, wallet_number=uuid4().hex, balance=0)
-    db.add(wallet)
-    db.commit()
-    db.refresh(wallet)
-    return wallet
 
 
 @router.post("/deposit", response_model=DepositResponse)
@@ -62,7 +54,7 @@ async def create_deposit(
 
     wallet = get_or_create_wallet(db, principal.user_id)
 
-    reference = f"dep_{uuid4().hex}"
+    reference = generate_reference_number()
 
     tx = Transaction(
         wallet_id=wallet.id,
@@ -75,9 +67,7 @@ async def create_deposit(
     db.commit()
     db.refresh(tx)
 
-    # Call Paystack initialize
-    PAYSTACK_SECRET_KEY = os.getenv("PAYSTACK_SECRET_KEY", "replace_me")
-    PAYSTACK_BASE_URL = "https://api.paystack.co"
+    
 
     headers = {"Authorization": f"Bearer {PAYSTACK_SECRET_KEY}"}
     user = db.query(User).filter(User.user_id == wallet.user_id).first()
@@ -113,20 +103,10 @@ async def create_deposit(
         )
 
     auth_url = data["data"]["authorization_url"]
-    tx.metadata = data["data"]
+    tx.meta = data["data"]
     db.commit()
 
     return DepositResponse(reference=reference, authorization_url=auth_url)
-
-
-def verify_paystack_signature(raw_body: bytes, signature: str) -> bool:
-    secret = os.getenv("PAYSTACK_SECRET_KEY")
-    expected = hmac.new(
-        key=secret.encode("utf-8"),
-        msg=raw_body,
-        digestmod=hashlib.sha512,  # Confirm with Paystack docs
-    ).hexdigest()
-    return hmac.compare_digest(expected, signature)
 
 
 @router.post("/paystack/webhook")
@@ -137,7 +117,7 @@ async def paystack_webhook(
 ):
     raw_body = await request.body()
 
-    if not x_paystack_signature or not verify_paystack_signature(raw_body, x_paystack_signature):
+    if not x_paystack_signature or not verify_paystack_signature(raw_body, x_paystack_signature, PAYSTACK_SECRET_KEY):
         raise HTTPException(
             status_code=status.HTTP_400_BAD_REQUEST,
             detail="Invalid signature",
@@ -165,7 +145,7 @@ async def paystack_webhook(
     if tx.status == TransactionStatus.SUCCESS:
         return {"status": True}
 
-    tx.metadata = payload
+    tx.meta = payload
 
     if status_str == "success":
         wallet = db.query(Wallet).filter(Wallet.id == tx.wallet_id).first()
@@ -179,21 +159,16 @@ async def paystack_webhook(
         db.commit()
 
     return {"status": True}
+
 @router.get("/deposit/{reference}/status", response_model=DepositStatusResponse)
 async def get_deposit_status(
     reference: str,
-    principal: Principal = Depends(get_principal),
     db: Session = Depends(get_db),
 ):
-    require_permission(principal, "read")
-
-    wallet = get_or_create_wallet(db, principal.user_id)
-
     tx = (
         db.query(Transaction)
         .filter(
             Transaction.reference == reference,
-            Transaction.wallet_id == wallet.id,
             Transaction.type == TransactionType.DEPOSIT,
         )
         .first()
@@ -287,7 +262,7 @@ async def get_wallet_balance(
     require_permission(principal, "read")
 
     wallet = get_or_create_wallet(db, principal.user_id)
-    return BalanceResponse(wallet_number=wallet.wallet_number, balance=wallet.balance)
+    return BalanceResponse(balance=wallet.balance)
 
 
 @router.get("/transactions", response_model=list[TransactionItem])

@@ -1,10 +1,7 @@
-from sqlalchemy import Column, String, Boolean, DateTime, func
+from sqlalchemy import Column, String, DateTime, func
 from app.database.db import Base
-from uuid import uuid4
-
 import enum
 from datetime import datetime
-from typing import Optional
 
 from sqlalchemy import (
     Column,
@@ -12,11 +9,8 @@ from sqlalchemy import (
     String,
     DateTime,
     ForeignKey,
-    Numeric,
-    Boolean,
     Enum,
     JSON,
-    UniqueConstraint,
 )
 
 class TransactionType(str, enum.Enum):

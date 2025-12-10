@@ -1,10 +1,12 @@
 # Wallet Service (HNG Internship Stage 8)
 
-A FastAPI-based wallet system implementing: - Google Authentication
-(OAuth2) - JWT session management - API Key authentication with
-permission control - Wallet creation, balance retrieval, deposits,
-transfers - Paystack payment integration (transaction initialization +
-webhook crediting) - Complete transaction history tracking
+A FastAPI-based wallet system implementing: 
+- Google Authentication (OAuth2) 
+- JWT session management 
+- API Key authentication with permission control 
+- Wallet creation, balance retrieval, deposits, transfers 
+- Paystack payment integration (transaction initialization + webhook crediting) 
+- Complete transaction history tracking
 
 ------------------------------------------------------------------------
 
@@ -18,7 +20,7 @@ webhook crediting) - Complete transaction history tracking
     -   Up to 5 per user
     -   Permissions: `read`, `deposit`, `transfer`
     -   Auto-expiry and revocation support
-
+-   Paystack webhook credits wallet (idempotent)
 ------------------------------------------------------------------------
 
 ## 💰 Wallet Operations
@@ -53,9 +55,9 @@ Returns a Paystack authorization URL + a unique transaction reference.
 
 Atomic transfer between wallets.
 
-<!-- ### 6. **Transactions List**
+### 6. **Transactions List**
 
-`GET /wallet/transactions` -->
+`GET /wallet/transactions`
 
 ------------------------------------------------------------------------
 
@@ -130,11 +132,17 @@ Set webhook URL in Paystack dashboard:
 
 **Install:**
 
-    pip install -r requirements.txt
+    pip install -r requirements.txt 
+                OR
+    uv pip install .
+
+**Migrations:**
+
+    alembic upgrade head
 
 **Start server:**
 
-    uvicorn app.main:app --reload
+    uvicorn main:app --reload
 
 ------------------------------------------------------------------------
 
@@ -154,5 +162,4 @@ Set webhook URL in Paystack dashboard:
 ------------------------------------------------------------------------
 
 ## 👨‍💻 Author
-Taiwo Oluwagbemiga
-HNG Internship (Stage 8 Wallet API Task)
+Taiwo Oluwagbemiga - HNG Internship (Stage 8 Wallet API Task)

@@ -117,6 +117,9 @@ def create_new_api(db, current_user, payload: ApiKeyRequest, expires = None):
 
 def verify_secret_hashes(api_key, current_user, db):
     split_value = api_key.split("_", 3) 
+    
+    if len(split_value) != 4 or split_value[0] != "sk":
+        raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Invalid API key format")
     public_key = split_value[2]
     secret_key = split_value[3]
     

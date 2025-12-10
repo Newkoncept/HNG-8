@@ -22,11 +22,9 @@ class TransferResponse(BaseModel):
     message: str
 
 class BalanceResponse(BaseModel):
-    wallet_number: str
     balance: int
 
 class TransactionItem(BaseModel):
     type: str
     amount: int
     status: str
-    created_at: datetime
