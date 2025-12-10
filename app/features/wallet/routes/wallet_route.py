@@ -34,8 +34,6 @@ router = APIRouter(prefix="/wallet", tags=["wallet"])
 PAYSTACK_SECRET_KEY = os.getenv("PAYSTACK_SECRET_KEY", "replace_me")
 PAYSTACK_BASE_URL = "https://api.paystack.co"
 
-def require_permission(_principal, _perm):  # no-op placeholder; wire to your API-key logic if needed
-    return
 
 def get_or_create_wallet(db: Session, user_id: str) -> Wallet:
     wallet = db.query(Wallet).filter(Wallet.user_id == user_id).first()

@@ -32,7 +32,7 @@ async def google_login():
         "redirect_uri": GOOGLE_REDIRECT_URI,
         "scope": OAUTH_SCOPES,
         "access_type": "offline",
-        "prompt": "consent",  # optional but useful in dev
+        "prompt": "consent",  
     }
     url = f"{GOOGLE_AUTH_URL}?{urlencode(params)}"
 
@@ -54,7 +54,6 @@ async def callback(code: str | None = None, error: str | None = None, db: Sessio
         raise HTTPException(status_code=400, detail="Missing code from Google")
 
     
-    # 1) Exchange code for tokens
     async with httpx.AsyncClient() as client:
         token_data = {
             "code": code,
@@ -75,7 +74,6 @@ async def callback(code: str | None = None, error: str | None = None, db: Sessio
         if not id_token:
             raise HTTPException(status_code=400, detail="No id_token in Google response")
 
-        # 2) (Recommended) Call userinfo endpoint (or manually decode id_token)
         headers = {"Authorization": f"Bearer {access_token}"}
         userinfo_resp = await client.get(GOOGLE_USERINFO_URL, headers=headers)
         if userinfo_resp.status_code != 200:
@@ -95,7 +93,6 @@ async def callback(code: str | None = None, error: str | None = None, db: Sessio
         }
         """
 
-    # 3) Here you would lookup/create user in your DB
     provider_sub = userinfo.get("sub")
 
 
@@ -113,8 +110,6 @@ async def callback(code: str | None = None, error: str | None = None, db: Sessio
 
     get_or_create_wallet(db, user_id= user.user_id)
 
-    # Example: create an internal user ID based on Google sub or from DB
-    # 4) Issue your own JWT
     access_jwt = create_access_token({"user_id":user.user_id})
 
     token_response = TokenResponse(access_token = access_jwt, token_type="bearer")

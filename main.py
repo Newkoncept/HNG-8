@@ -14,7 +14,7 @@ app = FastAPI()
 app.include_router(auth_router.router)
 app.include_router(api_route.router)
 app.include_router(wallet_route.router)
-app.include_router(transaction_route.router)
+# app.include_router(transaction_route.router)
 
 
 app.get('/', tags=["default"])
