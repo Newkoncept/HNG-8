@@ -24,6 +24,10 @@ from app.features.wallet.schemas.wallet_schema import (
     TransferResponse,
     TransactionItem
 )
+from dotenv import load_dotenv
+
+
+load_dotenv()
 
 router = APIRouter(prefix="/wallet", tags=["wallet"])
 
@@ -118,7 +122,7 @@ async def create_deposit(
 
 
 def verify_paystack_signature(raw_body: bytes, signature: str) -> bool:
-    secret = os.getenv("PAYSTACK_WEBHOOK_SECRET", "replace_me")
+    secret = os.getenv("PAYSTACK_SECRET_KEY")
     expected = hmac.new(
         key=secret.encode("utf-8"),
         msg=raw_body,
