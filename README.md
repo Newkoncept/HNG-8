@@ -102,12 +102,15 @@ Atomic transfer between wallets.
 
 Create a `.env` file:
 
-    JWT_SECRET=<your-secret>
-    GOOGLE_CLIENT_ID=<id>
-    GOOGLE_CLIENT_SECRET=<secret>
-    PAYSTACK_SECRET_KEY=sk_test_xxx
-    PAYSTACK_WEBHOOK_SECRET=sk_test_xxx
+    GOOGLE_CLIENT_ID
+    GOOGLE_CLIENT_SECRET
+    GOOGLE_REDIRECT_URI
+    JWT_SECRET_KEY
+    JWT_ALGORITHM
+    JWT_EXPIRES_MINUTES
     DATABASE_URL=postgresql://...
+    PAYSTACK_SECRET_KEY
+    PAYSTACK_CALLBACK_URL
 
 ------------------------------------------------------------------------
 
