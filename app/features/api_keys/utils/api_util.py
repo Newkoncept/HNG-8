@@ -85,7 +85,7 @@ def list_user_active_keys(db,current_user):
 def create_new_api(db, current_user, payload: ApiKeyRequest, expires = None):
     active_keys = len(list_user_active_keys(db, current_user))
     
-    if active_keys >= 20:
+    if active_keys >= 5:
         raise HTTPException(status_code= status.HTTP_409_CONFLICT, detail="Limit of 5 active keys reached")
     
     generated_key = generate_secure_key()
@@ -116,7 +116,7 @@ def create_new_api(db, current_user, payload: ApiKeyRequest, expires = None):
 
 
 def verify_secret_hashes(api_key, current_user, db):
-    split_value = api_key.split("_") 
+    split_value = api_key.split("_", 3) 
     public_key = split_value[2]
     secret_key = split_value[3]
     

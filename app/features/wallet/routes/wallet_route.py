@@ -58,7 +58,7 @@ async def create_deposit(
             detail="Amount must be positive",
         )
 
-    wallet = await get_or_create_wallet(db, principal.user_id)
+    wallet = get_or_create_wallet(db, principal.user_id)
 
     reference = f"dep_{uuid4().hex}"
 
@@ -80,7 +80,7 @@ async def create_deposit(
     headers = {"Authorization": f"Bearer {PAYSTACK_SECRET_KEY}"}
     user = db.query(User).filter(User.user_id == wallet.user_id).first()
     payload = {
-        "amount": body.amount,
+        "amount": body.amount * 100,
         "email": user.email,
         "reference": reference,
     }
@@ -185,7 +185,7 @@ async def get_deposit_status(
 ):
     require_permission(principal, "read")
 
-    wallet = await get_or_create_wallet(db, principal.user_id)
+    wallet = get_or_create_wallet(db, principal.user_id)
 
     tx = (
         db.query(Transaction)
@@ -223,7 +223,7 @@ async def transfer(
             detail="Amount must be positive",
         )
 
-    sender_wallet = await get_or_create_wallet(db, principal.user_id)
+    sender_wallet = get_or_create_wallet(db, principal.user_id)
 
     if sender_wallet.wallet_number == body.wallet_number:
         raise HTTPException(
@@ -284,7 +284,7 @@ async def get_wallet_balance(
 ):
     require_permission(principal, "read")
 
-    wallet = await get_or_create_wallet(db, principal.user_id)
+    wallet = get_or_create_wallet(db, principal.user_id)
     return BalanceResponse(balance=wallet.balance)
 
 
@@ -295,7 +295,7 @@ async def get_transactions(
 ):
     require_permission(principal, "read")
 
-    wallet = await get_or_create_wallet(db, principal.user_id)
+    wallet = get_or_create_wallet(db, principal.user_id)
 
     txs = (
         db.query(Transaction)

@@ -42,7 +42,7 @@ def decode_access_token(token: str) -> CurrentUser:
     except JWTError:
         raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Invalid or expired token")
 
-
-def get_current_user(credentials: HTTPAuthorizationCredentials = Depends(bearer_scheme)) -> CurrentUser:
-    token = credentials.credentials
+def get_current_user(token_or_creds: str | HTTPAuthorizationCredentials) -> CurrentUser:
+    # Accept either HTTPAuthorizationCredentials or a raw token string
+    token = token_or_creds.credentials if isinstance(token_or_creds, HTTPAuthorizationCredentials) else str(token_or_creds)
     return decode_access_token(token)

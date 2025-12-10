@@ -73,7 +73,7 @@ def revoke_key(
     db_api_key.is_revoked = True
     db.commit()
     return {
-        "message" : f"{api_key.api_key} successfully revoked"
+        "message" : f"{api_key} successfully revoked"
     }
 
 @router.post("/rollover", response_model=ApiKeyResponse)
